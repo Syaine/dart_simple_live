@@ -1,11 +1,21 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch: # 允许手动点击按钮触发
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # ⬇️⬇️⬇️ 新增部分开始 ⬇️⬇️⬇️
+    # 这里的 defaults 意思是：在这个任务里的所有命令行操作，
+    # 都默认进入 'app' 这个文件夹里执行。
+    # 请将 'app' 替换为你实际存放 pubspec.yaml 的文件夹名称！
+    defaults:
+      run:
+        working-directory: ./simple_live_app
+    # ⬆️⬆️⬆️ 新增部分结束 ⬆️⬆️⬆️
+
     steps:
       - uses: actions/checkout@v3
 
@@ -24,11 +34,15 @@ jobs:
         run: flutter pub get
 
       - name: Build APK (Release)
-        run: flutter build apk --release --no-tree-shake-icons
-        # 如果编译失败，尝试改成 flutter build apk --debug
+        # 尝试使用 --debug 以避免签名问题，如果想要 release 包且有签名配置再改回 --release
+        run: flutter build apk --debug 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-debug
+          # 注意：如果指定了工作目录，输出路径通常还是相对于工作目录的
+          # 或者 flutter build 输出路径通常包含 build/app/outputs...
+          # 如果后面上传失败，可能需要调整这里的路径
+          path: |
+            **/build/app/outputs/flutter-apk/*.apk
