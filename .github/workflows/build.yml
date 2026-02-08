@@ -35,7 +35,7 @@ jobs:
 
       - name: Build APK (Release)
         # 尝试使用 --debug 以避免签名问题，如果想要 release 包且有签名配置再改回 --release
-        run: flutter build apk --debug 
+        run: flutter build apk --release 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
