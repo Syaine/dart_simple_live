@@ -1,0 +1,43 @@
+name: Build TV APK
+
+on:
+  workflow_dispatch: # 手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    # ⬇️⬇️⬇️ 关键点：这里指定进入 TV 版的文件夹 ⬇️⬇️⬇️
+    defaults:
+      run:
+        working-directory: ./simple_live_tv_app
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build APK (Release)
+        # TV 版同样打 Release 包，但用 Debug 签名
+        run: flutter build apk --release
+
+      - name: Upload TV APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: simple-live-tv-release
+          # 输出路径通常是 build/app/outputs/flutter-apk/app-release.apk
+          # 因为上面定义了 working-directory，这里使用相对路径查找更稳妥
+          path: |
+            **/build/app/outputs/flutter-apk/*.apk
